@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Air Quality</h1>
+        <h1>Outdoor Air Quality</h1>
         
         <div class="dashboard-grid">
             <div class="card">
@@ -157,7 +157,9 @@
                     document.getElementById('humidity').innerText = latest.humidity !== null ? latest.humidity.toFixed(1) : '--';
                     document.getElementById('pm25').innerText = latest.sds_p2 !== null ? latest.sds_p2.toFixed(1) : '--';
                     document.getElementById('pm10').innerText = latest.sds_p1 !== null ? latest.sds_p1.toFixed(1) : '--';
-                    document.getElementById('lastUpdated').innerText = `Last updated: ${new Date(latest.timestamp).toLocaleTimeString()}`;
+                    const date = new Date(latest.timestamp);
+                    date.setHours(date.getHours() + 1);
+                    document.getElementById('lastUpdated').innerText = `Last updated: ${date.toLocaleTimeString()}`;
                 }
 
                 const historyRes = await fetch('/api/history?hours=24');
@@ -223,9 +225,21 @@
         }
 
         function updateChart(data) {
-            const p25Data = data.map(d => ({ x: new Date(d.timestamp), y: d.sds_p2 }));
-            const p10Data = data.map(d => ({ x: new Date(d.timestamp), y: d.sds_p1 }));
-            const tempData = data.map(d => ({ x: new Date(d.timestamp), y: d.temperature }));
+            const p25Data = data.map(d => {
+                const date = new Date(d.timestamp);
+                date.setHours(date.getHours() + 1);
+                return { x: date, y: d.sds_p2 };
+            });
+            const p10Data = data.map(d => {
+                const date = new Date(d.timestamp);
+                date.setHours(date.getHours() + 1);
+                return { x: date, y: d.sds_p1 };
+            });
+            const tempData = data.map(d => {
+                const date = new Date(d.timestamp);
+                date.setHours(date.getHours() + 1);
+                return { x: date, y: d.temperature };
+            });
 
             if (pm25Chart) pm25Chart.destroy();
             if (pm10Chart) pm10Chart.destroy();
