@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Outdoor Air Quality Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -172,10 +173,9 @@
             return new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data.labels,
                     datasets: [{
                         label: label,
-                        data: data.values,
+                        data: data,
                         borderColor: color,
                         backgroundColor: color + '22',
                         borderWidth: 2,
@@ -196,6 +196,14 @@
                     },
                     scales: {
                         x: {
+                            type: 'time',
+                            time: {
+                                unit: 'hour',
+                                displayFormats: {
+                                    hour: 'HH:mm'
+                                },
+                                tooltipFormat: 'HH:mm'
+                            },
                             ticks: {
                                 maxRotation: 0,
                                 autoSkip: true,
@@ -215,11 +223,9 @@
         }
 
         function updateChart(data) {
-            const labels = data.map(d => new Date(d.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-            
-            const p25Data = { labels, values: data.map(d => d.sds_p2) };
-            const p10Data = { labels, values: data.map(d => d.sds_p1) };
-            const tempData = { labels, values: data.map(d => d.temperature) };
+            const p25Data = data.map(d => ({ x: new Date(d.timestamp), y: d.sds_p2 }));
+            const p10Data = data.map(d => ({ x: new Date(d.timestamp), y: d.sds_p1 }));
+            const tempData = data.map(d => ({ x: new Date(d.timestamp), y: d.temperature }));
 
             if (pm25Chart) pm25Chart.destroy();
             if (pm10Chart) pm10Chart.destroy();
